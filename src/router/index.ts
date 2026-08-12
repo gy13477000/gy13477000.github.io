@@ -14,6 +14,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/ToolsView.vue')
   },
   {
+    path: '/tools/json',
+    name: 'json',
+    component: () => import('@/views/tools/JsonFormatterView.vue')
+  },
+  {
     path: '/tools/codec',
     name: 'codec',
     component: () => import('@/views/tools/CodecView.vue')

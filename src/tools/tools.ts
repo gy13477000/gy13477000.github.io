@@ -2,6 +2,15 @@ import type { ToolMeta } from './registry'
 
 export const tools: ToolMeta[] = [
   {
+    id: 'json',
+    name: 'JSON 格式化',
+    description: '美化、压缩、校验 JSON，支持树形浏览、字段搜索、节点路径复制。',
+    icon: 'Braces',
+    path: '/tools/json',
+    tags: ['常用', '开发者'],
+    featured: true
+  },
+  {
     id: 'codec',
     name: '编解码',
     description: 'Base64 / Hex / URL 编解码，Query String 解析与重构。',
