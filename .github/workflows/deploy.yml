@@ -33,6 +33,28 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify build output
+        run: |
+          echo "Checking dist/ contents..."
+          ls -la dist/
+          if [ ! -f dist/index.html ]; then
+            echo "❌ dist/index.html missing"
+            exit 1
+          fi
+          if [ ! -f dist/404.html ]; then
+            echo "❌ dist/404.html missing — SPA fallback won't work"
+            exit 1
+          fi
+          if ! ls dist/assets/*.js > /dev/null 2>&1; then
+            echo "❌ No JS bundle in dist/assets/"
+            exit 1
+          fi
+          echo "✅ Build output verified"
+          echo "--- index.html (first 15 lines) ---"
+          head -15 dist/index.html
+          echo "--- 404.html (first 5 lines) ---"
+          head -5 dist/404.html
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
