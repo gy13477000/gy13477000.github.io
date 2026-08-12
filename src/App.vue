@@ -2,6 +2,7 @@
 import { RouterView } from 'vue-router'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
+import CommandPalette from '@/components/CommandPalette.vue'
 </script>
 
 <template>
@@ -10,6 +11,7 @@ import AppFooter from '@/components/layout/AppFooter.vue'
     <RouterView />
   </main>
   <AppFooter />
+  <CommandPalette />
 </template>
 
 <style scoped>

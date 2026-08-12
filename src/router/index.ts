@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { tools } from '@/tools/tools'
+import { useCommandPaletteStore } from '@/stores/commandPalette'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -63,5 +65,21 @@ export const router = createRouter({
   routes,
   scrollBehavior() {
     return { top: 0 }
+  }
+})
+
+// 进入工具页时记录访问历史（用于 Cmd+K 最近使用）
+router.afterEach((to) => {
+  if (to.path.startsWith('/tools/')) {
+    const tool = tools.find((t) => t.path === to.path)
+    if (tool) {
+      // store 在 router 创建时可能还未初始化, 延迟到下一个 tick
+      import('pinia').then(({ getActivePinia }) => {
+        const pinia = getActivePinia()
+        if (!pinia) return
+        const palette = useCommandPaletteStore(pinia)
+        palette.recordVisit(tool.id)
+      })
+    }
   }
 })
