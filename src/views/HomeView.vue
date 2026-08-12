@@ -2,11 +2,12 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowRight } from 'lucide-vue-next'
-import { tools } from '@/tools/tools'
+import { useToolsPrefsStore } from '@/stores/toolsPrefs'
 
 const router = useRouter()
+const prefs = useToolsPrefsStore()
 
-const featuredTools = computed(() => tools.filter((t) => t.featured))
+const featuredTools = computed(() => prefs.featuredTools)
 </script>
 
 <template>
