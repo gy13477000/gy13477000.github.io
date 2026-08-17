@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, markRaw, shallowRef } from 'vue'
 import {
   Braces,
   Copy,
@@ -36,31 +36,47 @@ const treeVersion = ref(0) // 触发树重建
 const validation = computed(() => validateJson(input.value))
 
 // 树视图相关
-const tree = computed<JsonTreeNode | null>(() => {
-  void treeVersion.value
-  if (!validation.value.valid) return null
-  if (!input.value.trim()) return null
+// 用 shallowRef + markRaw: 树节点体量大, 不需要被 Vue 深度代理,
+// 否则在 prod 下 watch + treeVersion 的循环会触发 proxy trap 异常.
+const tree = shallowRef<JsonTreeNode | null>(null)
+
+function rebuildTree() {
+  if (!validation.value.valid) {
+    tree.value = null
+    return
+  }
+  if (!input.value.trim()) {
+    tree.value = null
+    return
+  }
   try {
     const parsed = JSON.parse(input.value)
-    return buildJsonTree(parsed)
+    const built = buildJsonTree(parsed)
+    if (built) tree.value = markRaw(built)
   } catch {
-    return null
+    tree.value = null
   }
-})
+}
 
-const stats = computed(() => statsOfTree(tree.value))
+watch(
+  [input, validation],
+  () => {
+    rebuildTree()
+  },
+  { immediate: true }
+)
 
-// 搜索: 每次输入重新标记
 watch(
   [tree, treeSearchQuery],
   () => {
     if (tree.value) {
       searchTree(tree.value, treeSearchQuery.value)
-      treeVersion.value++
     }
   },
   { immediate: true, flush: 'post' }
 )
+
+const stats = computed(() => statsOfTree(tree.value))
 
 function notify(type: 'success' | 'error', message: string) {
   status.value = { type, message }
