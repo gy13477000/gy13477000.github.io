@@ -6,6 +6,8 @@ import {
   base64ToUtf8,
   utf8ToHex,
   hexToUtf8,
+  base64ToHex,
+  hexToBase64,
   urlEncode,
   urlDecode,
   parseQueryString,
@@ -25,6 +27,10 @@ const status = ref<{ type: 'success' | 'error'; message: string } | null>(null)
 // query string 单独一栏
 const queryInput = ref('')
 const queryParams = ref<QueryParam[]>([])
+
+// Base64 ↔ Hex 直接转换
+const directB64 = ref('')
+const directHex = ref('')
 
 const inputMeta = computed(() => `${input.value.length} 字符 / ${new Blob([input.value]).size} 字节`)
 const outputMeta = computed(() =>
@@ -102,6 +108,32 @@ function removeParam(idx: number) {
 function rebuildQuery() {
   queryInput.value = buildQueryString(queryParams.value)
 }
+
+function b64ToHex() {
+  try {
+    if (!directB64.value.trim()) {
+      notify('error', '请输入 Base64')
+      return
+    }
+    directHex.value = base64ToHex(directB64.value)
+    notify('success', '已转换为 Hex')
+  } catch (e) {
+    notify('error', e instanceof Error ? e.message : String(e))
+  }
+}
+
+function hexToB64() {
+  try {
+    if (!directHex.value.trim()) {
+      notify('error', '请输入 Hex')
+      return
+    }
+    directB64.value = hexToBase64(directHex.value)
+    notify('success', '已转换为 Base64')
+  } catch (e) {
+    notify('error', e instanceof Error ? e.message : String(e))
+  }
+}
 </script>
 
 <template>
@@ -154,6 +186,29 @@ function rebuildQuery() {
             </button>
           </div>
           <textarea v-model="output" class="textarea mono" spellcheck="false" placeholder="结果将显示在这里..."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2 class="section-title">Base64 ↔ Hex 直转</h2>
+        <p class="section-desc">按二进制解释，避免 UTF-8 往返带来的偏差</p>
+      </div>
+      <div class="direct-grid">
+        <div class="pane">
+          <div class="pane-head">
+            <span class="pane-title">Base64</span>
+            <button class="btn btn-secondary btn-sm" @click="b64ToHex">转换为 Hex →</button>
+          </div>
+          <textarea v-model="directB64" class="textarea mono" spellcheck="false" placeholder="输入 Base64 字符串..."></textarea>
+        </div>
+        <div class="pane">
+          <div class="pane-head">
+            <span class="pane-title">Hex</span>
+            <button class="btn btn-secondary btn-sm" @click="hexToB64">← 转换为 Base64</button>
+          </div>
+          <textarea v-model="directHex" class="textarea mono" spellcheck="false" placeholder="输入 Hex 字符串 (偶数位)..."></textarea>
         </div>
       </div>
     </section>
@@ -288,10 +343,25 @@ function rebuildQuery() {
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--space-3);
+  gap: var(--space-3);
 }
 .section-title { font-size: 16px; font-weight: 600; }
+.section-desc { color: var(--color-text-muted); font-size: 13px; }
 .actions { display: flex; gap: var(--space-2); }
 .query-input { min-height: 70px; }
+
+.direct-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+.direct-grid .textarea {
+  min-height: 140px;
+  border: none;
+  border-radius: 0;
+  resize: vertical;
+}
+.direct-grid .textarea:focus { box-shadow: none; }
 
 .params-table { margin-top: var(--space-3); }
 .param-row {
@@ -311,5 +381,6 @@ function rebuildQuery() {
 
 @media (max-width: 768px) {
   .editor-grid { grid-template-columns: 1fr; }
+  .direct-grid { grid-template-columns: 1fr; }
 }
 </style>

@@ -35,6 +35,15 @@ export function base64ToUtf8(b64: string): string {
   return bytesToStr(base64ToBytes(b64))
 }
 
+// Base64 <-> Hex 直接互转 (按二进制解释，不经过 UTF-8)
+export function base64ToHex(b64: string): string {
+  return bytesToHex(base64ToBytes(b64))
+}
+
+export function hexToBase64(hex: string): string {
+  return bytesToBase64(hexToBytes(hex))
+}
+
 // hex 编码（顺便提供）
 export function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes)
